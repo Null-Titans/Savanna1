@@ -1,0 +1,117 @@
+[
+  {
+    "id": "demo-job-1",
+    "title": "Junior Customer Support Specialist",
+    "organization": "Addis Digital Services (Demo Employer)",
+    "location": "Addis Ababa / Hybrid",
+    "isRemote": true,
+    "employmentType": "Full-time",
+    "descriptionSummary": "Answer learner and customer questions by text chat and email. Full paid training provided in plain language.",
+    "requiredSkills": ["Clear written communication", "Basic computer typing", "Patience and listening"],
+    "accommodationCategories": ["remote_flexible", "flexible_hours", "screen_reader_tools", "communication_support"],
+    "accommodationsOffered": [
+      "Remote work from home available 4 days a week",
+      "Screen-reader-tested chat and ticketing tools (NVDA & JAWS verified)",
+      "Flexible shift start times within a 2-hour window",
+      "Written and captioned onboarding instructions"
+    ],
+    "applicationDeadline": "2026-12-30",
+    "postedAtIso": "2026-11-01T09:00:00Z",
+    "isDemoData": true
+  },
+  {
+    "id": "demo-job-2",
+    "title": "Data Entry & Document Accessibility Associate",
+    "organization": "Horizon Community Learning (Demo Employer)",
+    "location": "Remote (Ethiopia & East Africa)",
+    "isRemote": true,
+    "employmentType": "Part-time",
+    "descriptionSummary": "Review training handouts, add alt text to learning images, and organize course schedules.",
+    "requiredSkills": ["Attention to detail", "Amharic or English reading", "Spreadsheet basics"],
+    "accommodationCategories": ["remote_flexible", "flexible_hours", "screen_reader_tools", "assistive_tech"],
+    "accommodationsOffered": [
+      "100% remote work with low-bandwidth mobile support",
+      "Flexible 20 hours per week schedule",
+      "Stipend for assistive software or ergonomic keyboard",
+      "Screen-reader-friendly spreadsheet templates"
+    ],
+    "applicationDeadline": "2026-12-18",
+    "postedAtIso": "2026-11-05T10:00:00Z",
+    "isDemoData": true
+  },
+  {
+    "id": "demo-job-3",
+    "title": "Community Tech Hub Assistant",
+    "organization": "Nile Youth Training Center (Demo Employer)",
+    "location": "Bahir Dar, Ethiopia",
+    "isRemote": false,
+    "employmentType": "Apprenticeship",
+    "descriptionSummary": "Welcome new learners at the community hub, help them sign in to tablets, and keep learning stations tidy.",
+    "requiredSkills": ["Friendly welcoming attitude", "Amharic speaking", "Willingness to learn"],
+    "accommodationCategories": ["accessible_workplace", "communication_support", "other_accommodations"],
+    "accommodationsOffered": [
+      "Wheelchair-accessible entrance, desk height, and restroom",
+      "Quiet break room available during busy hours",
+      "Plain-language checklists and visual step guides",
+      "Sign-language interpreter available for team meetings"
+    ],
+    "postedAtIso": "2026-11-08T12:00:00Z",
+    "isDemoData": true
+  },
+  {
+    "id": "demo-job-4",
+    "title": "Amharic & English Content Reviewer",
+    "organization": "EthioEd Open Publishing (Demo Employer)",
+    "location": "Remote (Addis Ababa / Nationwide)",
+    "isRemote": true,
+    "employmentType": "Contract",
+    "descriptionSummary": "Proofread short learning lessons in Amharic and English and verify plain-language headings.",
+    "requiredSkills": ["Amharic reading", "Plain-language editing", "Reliable chat check-ins"],
+    "accommodationCategories": ["remote_flexible", "flexible_hours", "screen_reader_tools", "communication_support"],
+    "accommodationsOffered": [
+      "100% remote with flexible daily hours",
+      "Screen-reader friendly workplace and document templates",
+      "Sign-language or written-chat interpreter for interviews"
+    ],
+    "applicationDeadline": "2026-12-22",
+    "postedAtIso": "2026-11-09T09:30:00Z",
+    "isDemoData": true
+  },
+  {
+    "id": "demo-job-5",
+    "title": "IT Helpdesk & Accessibility Tester",
+    "organization": "Savanna Digital Academy (Demo Employer)",
+    "location": "Addis Ababa / Hybrid",
+    "isRemote": true,
+    "employmentType": "Full-time",
+    "descriptionSummary": "Test web pages with keyboard navigation and screen readers, and help learners reset accounts.",
+    "requiredSkills": ["Keyboard navigation", "Problem solving", "Team communication"],
+    "accommodationCategories": ["remote_flexible", "screen_reader_tools", "accessible_workplace", "assistive_tech"],
+    "accommodationsOffered": [
+      "Screen-reader friendly workplace with NVDA, JAWS, and VoiceOver test kits",
+      "Remote work 3 days per week",
+      "Step-free Addis Ababa hub with quiet sensory room"
+    ],
+    "applicationDeadline": "2026-12-28",
+    "postedAtIso": "2026-11-10T11:00:00Z",
+    "isDemoData": true
+  },
+  {
+    "id": "demo-job-6",
+    "title": "Community Outreach Coordinator",
+    "organization": "East Africa Inclusion Network (Demo Employer)",
+    "location": "Hawassa / Remote",
+    "isRemote": true,
+    "employmentType": "Part-time",
+    "descriptionSummary": "Coordinate local registration sessions with community partners and share plain-language guides.",
+    "requiredSkills": ["Afaan Oromo or Amharic", "Community coordination", "Listening skills"],
+    "accommodationCategories": ["remote_flexible", "flexible_hours", "communication_support", "other_accommodations"],
+    "accommodationsOffered": [
+      "Sign-language interpreter for interviews and community events",
+      "Flexible hours around family or health schedules",
+      "Remote planning days with mobile data stipend"
+    ],
+    "postedAtIso": "2026-11-11T14:00:00Z",
+    "isDemoData": true
+  }
+]

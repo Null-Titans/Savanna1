@@ -1,13 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { SupportedLanguage } from '../types/gateway';
-import type { ToolCallExecutionResult, ToolCallRequest } from '../context/WebsiteAgentContext';
-import { getLiveListeningGreeting, isGoodbyeCommand } from '../utils/voiceCommands';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { SupportedLanguage } from "../types/gateway";
+import type {
+  ToolCallExecutionResult,
+  ToolCallRequest,
+} from "../context/WebsiteAgentContext";
+import {
+  getLiveListeningGreeting,
+  isGoodbyeCommand,
+} from "../utils/voiceCommands";
 
-export type GeminiLiveStatus = 'idle' | 'connecting' | 'connected' | 'error';
+export type GeminiLiveStatus = "idle" | "connecting" | "connected" | "error";
 
 export interface LiveTranscriptEntry {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   text: string;
   timestampIso: string;
 }
@@ -26,7 +32,7 @@ function pcmFloat32ToInt16Base64(float32: Float32Array): string {
     int16[i] = clamped < 0 ? clamped * 0x8000 : clamped * 0x7fff;
   }
   const bytes = new Uint8Array(int16.buffer);
-  let binary = '';
+  let binary = "";
   const chunkSize = 0x8000;
   for (let i = 0; i < bytes.length; i += chunkSize) {
     binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
@@ -51,16 +57,16 @@ function base64PcmInt16ToFloat32(base64: string): Float32Array {
 
 export function useGeminiLive(
   language: SupportedLanguage,
-  context: string = 'career',
-  options?: UseGeminiLiveOptions
+  context: string = "career",
+  options?: UseGeminiLiveOptions,
 ) {
-  const [status, setStatus] = useState<GeminiLiveStatus>('idle');
+  const [status, setStatus] = useState<GeminiLiveStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [liveInputDraft, setLiveInputDraft] = useState('');
-  const [liveOutputDraft, setLiveOutputDraft] = useState('');
+  const [liveInputDraft, setLiveInputDraft] = useState("");
+  const [liveOutputDraft, setLiveOutputDraft] = useState("");
   const [entries, setEntries] = useState<LiveTranscriptEntry[]>([]);
 
-  const statusRef = useRef<GeminiLiveStatus>('idle');
+  const statusRef = useRef<GeminiLiveStatus>("idle");
   const wsRef = useRef<WebSocket | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const inputCtxRef = useRef<AudioContext | null>(null);
@@ -68,8 +74,8 @@ export function useGeminiLive(
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const activeSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
   const nextStartTimeRef = useRef<number>(0);
-  const inputAccRef = useRef('');
-  const outputAccRef = useRef('');
+  const inputAccRef = useRef("");
+  const outputAccRef = useRef("");
   const exitTriggeredRef = useRef(false);
   const sessionAttemptIdRef = useRef(0);
   const onToolCallRef = useRef(options?.onToolCall);
@@ -168,7 +174,7 @@ export function useGeminiLive(
   const scheduleAudioChunk = useCallback((base64Pcm: string) => {
     const outCtx = outputCtxRef.current;
     if (!outCtx) return;
-    if (outCtx.state === 'suspended') {
+    if (outCtx.state === "suspended") {
       void outCtx.resume().catch(() => {});
     }
     const floatSamples = base64PcmInt16ToFloat32(base64Pcm);
@@ -200,80 +206,108 @@ export function useGeminiLive(
         const next = [...prev];
         const ts = new Date().toISOString();
         if (userText) {
-          next.push({ id: `live-u-${Date.now()}-${next.length}`, role: 'user', text: userText, timestampIso: ts });
+          next.push({
+            id: `live-u-${Date.now()}-${next.length}`,
+            role: "user",
+            text: userText,
+            timestampIso: ts,
+          });
         }
         if (botText) {
-          next.push({ id: `live-a-${Date.now()}-${next.length}`, role: 'assistant', text: botText, timestampIso: ts });
+          next.push({
+            id: `live-a-${Date.now()}-${next.length}`,
+            role: "assistant",
+            text: botText,
+            timestampIso: ts,
+          });
         }
         return next;
       });
     }
-    inputAccRef.current = '';
-    outputAccRef.current = '';
-    setLiveInputDraft('');
-    setLiveOutputDraft('');
+    inputAccRef.current = "";
+    outputAccRef.current = "";
+    setLiveInputDraft("");
+    setLiveOutputDraft("");
   }, []);
 
   const stopSession = useCallback(() => {
     flushAccumulators();
     cleanupResources();
-    updateStatus('idle');
+    updateStatus("idle");
   }, [cleanupResources, flushAccumulators, updateStatus]);
 
   const syncContext = useCallback((overrideState?: Record<string, unknown>) => {
     const ws = wsRef.current;
-    if (!ws || ws.readyState !== WebSocket.OPEN || statusRef.current !== 'connected') {
+    if (
+      !ws ||
+      ws.readyState !== WebSocket.OPEN ||
+      statusRef.current !== "connected"
+    ) {
       return false;
     }
     const statePayload = overrideState || getStateSnapshotRef.current?.();
     if (!statePayload) return false;
-    ws.send(JSON.stringify({ type: 'context', state: statePayload }));
+    ws.send(JSON.stringify({ type: "context", state: statePayload }));
     return true;
   }, []);
 
   const startSession = useCallback(
     async (startOpts?: { greetOnReady?: boolean }): Promise<boolean> => {
       // Prevent duplicate simultaneous sessions when already connecting or active
-      if (statusRef.current === 'connecting' || statusRef.current === 'connected') {
+      if (
+        statusRef.current === "connecting" ||
+        statusRef.current === "connected"
+      ) {
         return false;
       }
 
       cleanupResources();
       const attemptId = sessionAttemptIdRef.current;
       setErrorMessage(null);
-      inputAccRef.current = '';
-      outputAccRef.current = '';
+      inputAccRef.current = "";
+      outputAccRef.current = "";
       exitTriggeredRef.current = false;
-      setLiveInputDraft('');
-      setLiveOutputDraft('');
-      updateStatus('connecting');
+      setLiveInputDraft("");
+      setLiveOutputDraft("");
+      updateStatus("connecting");
 
-      if (typeof window === 'undefined' || typeof WebSocket === 'undefined') {
-        updateStatus('error');
-        setErrorMessage('WebSocket audio streaming is unavailable in this environment.');
+      if (typeof window === "undefined" || typeof WebSocket === "undefined") {
+        updateStatus("error");
+        setErrorMessage(
+          "WebSocket audio streaming is unavailable in this environment.",
+        );
         return false;
       }
 
-      if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
-        updateStatus('error');
+      if (
+        !navigator.mediaDevices ||
+        typeof navigator.mediaDevices.getUserMedia !== "function"
+      ) {
+        updateStatus("error");
         setErrorMessage(
-          'Microphone capture is not supported in this browser. Use text input or browser voice filtering instead.'
+          "Microphone capture is not supported in this browser. Use text input or browser voice filtering instead.",
         );
         return false;
       }
 
       const AudioCtx =
         window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
       if (!AudioCtx) {
-        updateStatus('error');
-        setErrorMessage('Web Audio API is unavailable in this browser.');
+        updateStatus("error");
+        setErrorMessage("Web Audio API is unavailable in this browser.");
         return false;
       }
 
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        if (attemptId !== sessionAttemptIdRef.current || statusRef.current === 'idle') {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        if (
+          attemptId !== sessionAttemptIdRef.current ||
+          statusRef.current === "idle"
+        ) {
           stream.getTracks().forEach((track) => track.stop());
           return false;
         }
@@ -281,19 +315,24 @@ export function useGeminiLive(
 
         const inputCtx = new AudioCtx({ sampleRate: 16000 });
         const outputCtx = new AudioCtx({ sampleRate: 24000 });
-        if (inputCtx.state === 'suspended') {
+        if (inputCtx.state === "suspended") {
           void inputCtx.resume().catch(() => {});
         }
-        if (outputCtx.state === 'suspended') {
+        if (outputCtx.state === "suspended") {
           void outputCtx.resume().catch(() => {});
         }
         inputCtxRef.current = inputCtx;
         outputCtxRef.current = outputCtx;
         nextStartTimeRef.current = outputCtx.currentTime;
 
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/api/speech/live?lang=${encodeURIComponent(
-          language
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const wsBaseUrl = (import.meta.env.VITE_WS_BASE_URL || "")
+          .trim()
+          .replace(/\/+$/, "");
+        const wsOrigin = wsBaseUrl || `${protocol}//${window.location.host}`;
+
+        const wsUrl = `${wsOrigin}/api/speech/live?lang=${encodeURIComponent(
+          language,
         )}&context=${encodeURIComponent(context)}`;
         const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
@@ -306,13 +345,13 @@ export function useGeminiLive(
           if (
             wsRef.current !== ws ||
             ws.readyState !== WebSocket.OPEN ||
-            statusRef.current !== 'connected'
+            statusRef.current !== "connected"
           ) {
             return;
           }
           const channel = ev.inputBuffer.getChannelData(0);
           const base64Audio = pcmFloat32ToInt16Base64(channel);
-          ws.send(JSON.stringify({ type: 'audio', audio: base64Audio }));
+          ws.send(JSON.stringify({ type: "audio", audio: base64Audio }));
         };
 
         source.connect(processor);
@@ -329,32 +368,45 @@ export function useGeminiLive(
               message?: string;
               calls?: ToolCallRequest[];
             };
-            if (msg.type === 'ready') {
-              updateStatus('connected');
-              if (getStateSnapshotRef.current && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: 'context', state: getStateSnapshotRef.current() }));
+            if (msg.type === "ready") {
+              updateStatus("connected");
+              if (
+                getStateSnapshotRef.current &&
+                ws.readyState === WebSocket.OPEN
+              ) {
+                ws.send(
+                  JSON.stringify({
+                    type: "context",
+                    state: getStateSnapshotRef.current(),
+                  }),
+                );
               }
               if (greetOnReady) {
                 const greetingText = getLiveListeningGreeting(language);
                 setEntries((prev) => {
                   const last = prev[prev.length - 1];
-                  if (last?.role === 'assistant' && last.text === greetingText) return prev;
+                  if (last?.role === "assistant" && last.text === greetingText)
+                    return prev;
                   return [
                     ...prev,
                     {
                       id: `live-greet-${Date.now()}`,
-                      role: 'assistant',
+                      role: "assistant",
                       text: greetingText,
                       timestampIso: new Date().toISOString(),
                     },
                   ];
                 });
                 if (ws.readyState === WebSocket.OPEN) {
-                  ws.send(JSON.stringify({ type: 'greet' }));
+                  ws.send(JSON.stringify({ type: "greet" }));
                 }
                 onSessionReadyRef.current?.(greetingText);
               }
-            } else if (msg.type === 'toolCalls' && Array.isArray(msg.calls) && onToolCallRef.current) {
+            } else if (
+              msg.type === "toolCalls" &&
+              Array.isArray(msg.calls) &&
+              onToolCallRef.current
+            ) {
               const runner = onToolCallRef.current;
               void (async () => {
                 const functionResponses: Array<{
@@ -364,7 +416,11 @@ export function useGeminiLive(
                 }> = [];
                 for (const call of msg.calls!) {
                   try {
-                    const res = await runner({ id: call.id, name: call.name, args: call.args || {} });
+                    const res = await runner({
+                      id: call.id,
+                      name: call.name,
+                      args: call.args || {},
+                    });
                     functionResponses.push({
                       id: call.id,
                       name: call.name,
@@ -374,41 +430,64 @@ export function useGeminiLive(
                     functionResponses.push({
                       id: call.id,
                       name: call.name,
-                      response: { error: err instanceof Error ? err.message : 'Tool execution failed' },
+                      response: {
+                        error:
+                          err instanceof Error
+                            ? err.message
+                            : "Tool execution failed",
+                      },
                     });
                   }
                 }
-                if (ws.readyState === WebSocket.OPEN && functionResponses.length > 0) {
-                  ws.send(JSON.stringify({ type: 'toolResponses', functionResponses }));
+                if (
+                  ws.readyState === WebSocket.OPEN &&
+                  functionResponses.length > 0
+                ) {
+                  ws.send(
+                    JSON.stringify({
+                      type: "toolResponses",
+                      functionResponses,
+                    }),
+                  );
                   if (getStateSnapshotRef.current) {
-                    ws.send(JSON.stringify({ type: 'context', state: getStateSnapshotRef.current() }));
+                    ws.send(
+                      JSON.stringify({
+                        type: "context",
+                        state: getStateSnapshotRef.current(),
+                      }),
+                    );
                   }
                 }
               })();
-            } else if (msg.type === 'audio' && msg.data) {
+            } else if (msg.type === "audio" && msg.data) {
               scheduleAudioChunk(msg.data);
-            } else if (msg.type === 'inputTranscript' && msg.text) {
+            } else if (msg.type === "inputTranscript" && msg.text) {
               const combined = `${inputAccRef.current} ${msg.text}`.trim();
               inputAccRef.current = combined;
               setLiveInputDraft(combined);
 
-              if (!exitTriggeredRef.current && (isGoodbyeCommand(msg.text) || isGoodbyeCommand(combined))) {
+              if (
+                !exitTriggeredRef.current &&
+                (isGoodbyeCommand(msg.text) || isGoodbyeCommand(combined))
+              ) {
                 exitTriggeredRef.current = true;
                 stopSession();
                 onExitCommandRef.current?.(combined);
               }
-            } else if (msg.type === 'outputTranscript' && msg.text) {
-              outputAccRef.current = `${outputAccRef.current} ${msg.text}`.trim();
+            } else if (msg.type === "outputTranscript" && msg.text) {
+              outputAccRef.current =
+                `${outputAccRef.current} ${msg.text}`.trim();
               setLiveOutputDraft(outputAccRef.current);
-            } else if (msg.type === 'interrupted') {
+            } else if (msg.type === "interrupted") {
               stopPlaybackQueue();
-            } else if (msg.type === 'turnComplete') {
+            } else if (msg.type === "turnComplete") {
               flushAccumulators();
-            } else if (msg.type === 'error') {
+            } else if (msg.type === "error") {
               cleanupResources();
-              updateStatus('error');
+              updateStatus("error");
               setErrorMessage(
-                msg.message || 'Could not maintain Gemini Live voice connection.'
+                msg.message ||
+                  "Could not maintain Gemini Live voice connection.",
               );
             }
           } catch {
@@ -417,37 +496,40 @@ export function useGeminiLive(
         };
 
         ws.onerror = () => {
-          if (statusRef.current !== 'error') {
+          if (statusRef.current !== "error") {
             cleanupResources();
-            updateStatus('error');
+            updateStatus("error");
             setErrorMessage(
-              'Real-time Live voice connection could not be reached. Please try again or use browser voice filtering.'
+              "Real-time Live voice connection could not be reached. Please try again or use browser voice filtering.",
             );
           }
         };
 
         ws.onclose = () => {
-          if (statusRef.current === 'connected' || statusRef.current === 'connecting') {
+          if (
+            statusRef.current === "connected" ||
+            statusRef.current === "connecting"
+          ) {
             flushAccumulators();
             cleanupResources();
-            updateStatus('idle');
+            updateStatus("idle");
           }
         };
 
         return true;
       } catch (err) {
         cleanupResources();
-        updateStatus('error');
-        const name = (err as Error)?.name || '';
-        if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        updateStatus("error");
+        const name = (err as Error)?.name || "";
+        if (name === "NotAllowedError" || name === "PermissionDeniedError") {
           setErrorMessage(
-            'Microphone permission was denied. Allow microphone access in browser settings and try again.'
+            "Microphone permission was denied. Allow microphone access in browser settings and try again.",
           );
         } else {
           setErrorMessage(
             err instanceof Error
               ? err.message
-              : 'Unable to start real-time voice conversation.'
+              : "Unable to start real-time voice conversation.",
           );
         }
         return false;
@@ -462,7 +544,7 @@ export function useGeminiLive(
       stopPlaybackQueue,
       stopSession,
       updateStatus,
-    ]
+    ],
   );
 
   const sendText = useCallback(
@@ -477,7 +559,7 @@ export function useGeminiLive(
           ...prev,
           {
             id: `live-u-${Date.now()}-${prev.length}`,
-            role: 'user',
+            role: "user",
             text: cleaned,
             timestampIso: new Date().toISOString(),
           },
@@ -487,25 +569,25 @@ export function useGeminiLive(
         return true;
       }
 
-      ws.send(JSON.stringify({ type: 'text', text: cleaned }));
+      ws.send(JSON.stringify({ type: "text", text: cleaned }));
       setEntries((prev) => [
         ...prev,
         {
           id: `live-u-${Date.now()}-${prev.length}`,
-          role: 'user',
+          role: "user",
           text: cleaned,
           timestampIso: new Date().toISOString(),
         },
       ]);
       return true;
     },
-    [stopSession]
+    [stopSession],
   );
 
   const clearEntries = useCallback(() => {
     setEntries([]);
-    setLiveInputDraft('');
-    setLiveOutputDraft('');
+    setLiveInputDraft("");
+    setLiveOutputDraft("");
   }, []);
 
   return {

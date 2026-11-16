@@ -122,7 +122,7 @@ export const GatewayHeader: React.FC<GatewayHeaderProps> = ({
         <nav
           aria-label="Primary navigation"
           onKeyDown={handleNavKeyDown}
-          className="hidden 2xl:flex items-center justify-center gap-3 min-w-0 flex-1"
+          className="hidden xl:flex items-center justify-center gap-3 min-w-0 flex-1"
         >
           {navItems.map((item) => {
             const isCurrent = activeModule === item.id;
@@ -146,12 +146,12 @@ export const GatewayHeader: React.FC<GatewayHeaderProps> = ({
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 shrink-0 ml-auto 2xl:ml-0">
+        <div className="flex items-center gap-2 shrink-0 ml-auto xl:ml-0">
           {/* Registration CTA: large screens only */}
           <button
             type="button"
             onClick={() => handleNav("onboarding")}
-            className="hidden 2xl:inline-flex items-center justify-center gap-1.5 min-h-[42px] px-4 py-2 rounded-md text-sm font-bold whitespace-nowrap shrink-0 bg-amber-500 text-[#0F1E36] hover:bg-amber-400 transition-colors shadow-sm cursor-pointer"
+            className="hidden xl:inline-flex items-center justify-center gap-1.5 min-h-[42px] px-4 py-2 rounded-md text-sm font-bold whitespace-nowrap shrink-0 bg-amber-500 text-[#0F1E36] hover:bg-amber-400 transition-colors shadow-sm cursor-pointer"
           >
             <span>{t.nav.startAction}</span>
             <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
@@ -166,7 +166,7 @@ export const GatewayHeader: React.FC<GatewayHeaderProps> = ({
               mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"
             }
             onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="2xl:hidden inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg border border-white/20 bg-[#162947] text-white hover:bg-[#1E3A5F] transition-colors cursor-pointer"
+            className="xl:hidden inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-lg border border-white/20 bg-[#162947] text-white hover:bg-[#1E3A5F] transition-colors cursor-pointer"
           >
             {mobileMenuOpen ? (
               <X className="w-5 h-5" />
@@ -183,7 +183,7 @@ export const GatewayHeader: React.FC<GatewayHeaderProps> = ({
           id="gw-mobile-nav"
           aria-label="Mobile navigation"
           onKeyDown={handleNavKeyDown}
-          className="2xl:hidden w-full max-w-full min-w-0 border-t border-white/10 bg-[#162947] px-4 py-3 space-y-1"
+          className="xl:hidden w-full max-w-full min-w-0 border-t border-white/10 bg-[#162947] px-4 py-3 space-y-1"
         >
           {navItems.map((item) => {
             const isCurrent = activeModule === item.id;
